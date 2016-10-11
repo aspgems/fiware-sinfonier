@@ -257,8 +257,10 @@ public class ModuleVersion extends ModelCollection {
   }
 
   public void recheck() throws SinfonierException {
-    setStatus(STATUS_PENDING);
-    save();
+	DBObject toSet = new BasicDBObject(FIELD_STATUS, STATUS_PENDING);
+	DBObject query = new BasicDBObject(FIELD_ID, new ObjectId(getId()));
+	DBCollection collection = MongoFactory.getDB().getCollection(collectionName);
+	collection.update(query, new BasicDBObject("$set", toSet));
   }
 
   public File exportAsJson(Module module) {
