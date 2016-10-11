@@ -1,13 +1,18 @@
 package models.topology;
 
+import static models.SinfonierConstants.Wire.FIELD_SOURCES;
+import static models.SinfonierConstants.Wire.FIELD_SOURCES_ANNOTATION;
+import static models.SinfonierConstants.Wire.FIELD_TARGET;
+import static models.SinfonierConstants.Wire.FIELD_TARGET_ANNOTATION;
+import static models.SinfonierConstants.Wire.FIELD_XTYPE;
+
+import java.io.Serializable;
+
+import com.google.gson.annotations.SerializedName;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
-import static models.SinfonierConstants.Wire.*;
-
-import com.google.gson.annotations.SerializedName;
-
-public class Wire {
+public class Wire implements Serializable{
   private String xType;
   
   @SerializedName(FIELD_SOURCES_ANNOTATION)

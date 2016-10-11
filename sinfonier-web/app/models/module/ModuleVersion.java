@@ -255,16 +255,36 @@ public class ModuleVersion extends ModelCollection {
     DBCollection collection = MongoFactory.getDB().getCollection(collectionName);
     collection.update(query, new BasicDBObject("$set", toSet));
   }
-
+  
   public void recheck() throws SinfonierException {
-	DBObject toSet = new BasicDBObject(FIELD_STATUS, STATUS_PENDING);
-	DBObject query = new BasicDBObject(FIELD_ID, new ObjectId(getId()));
-	DBCollection collection = MongoFactory.getDB().getCollection(collectionName);
-	collection.update(query, new BasicDBObject("$set", toSet));
-  }
+	    DBObject toSet = new BasicDBObject(FIELD_STATUS, STATUS_PENDING);
+	    DBObject query = new BasicDBObject(FIELD_ID, new ObjectId(getId()));
+	    DBCollection collection = MongoFactory.getDB().getCollection(collectionName);
+	    collection.update(query, new BasicDBObject("$set", toSet));
+	  }
 
   public File exportAsJson(Module module) {
-    DBObject obj = module.toDBObject();
+    JsonObject res = toJson(module);
+    File dir = FileUtils.getFile(PATH_TO_SAVE);
+
+    if (!dir.exists()) {
+      dir.mkdirs();
+    }
+
+    String fileName = module.getName() + ".json";
+    File file = FileUtils.getFile(dir, fileName);
+
+    try {
+      FileUtils.writeByteArrayToFile(file, res.toString().getBytes("UTF-8"));
+    } catch (IOException e) {
+      Logger.error(e.getMessage());
+    }
+
+    return file;
+  }
+
+public JsonObject toJson(Module module) {
+	DBObject obj = module.toDBObject();
     obj.putAll(this.toDBObject());
 
     obj.removeField(FIELD_ID);
@@ -283,23 +303,8 @@ public class ModuleVersion extends ModelCollection {
     obj.removeField(FIELD_VERSIONS);
 
     JsonObject res = Mongo2gson.getAsJsonObject(obj);
-    File dir = FileUtils.getFile(PATH_TO_SAVE);
-
-    if (!dir.exists()) {
-      dir.mkdirs();
-    }
-
-    String fileName = module.getName() + ".json";
-    File file = FileUtils.getFile(dir, fileName);
-
-    try {
-      FileUtils.writeByteArrayToFile(file, res.toString().getBytes("UTF-8"));
-    } catch (IOException e) {
-      Logger.error(e.getMessage());
-    }
-
-    return file;
-  }
+	return res;
+}
 
   public void addToMyTools(MyTool tool) {
     DBObject toSet = new BasicDBObject();
