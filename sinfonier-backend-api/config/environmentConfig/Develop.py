@@ -12,8 +12,8 @@ class Config:
     STORM_UI_PORT = "8080"
 
     # Gist Credentials
-    GIST_USERNAME = 'your_gist_user_name'
-    GIST_TOKEN = 'your_gist_user_token'
+    GIST_USERNAME = os.getenv('GIST_USERNAME','your_gist_user_name')
+    GIST_TOKEN = os.getenv('GIST_TOKEN','your_gist_user_token')
 
     # Mongodb's Config
     MONGO_HOST = 'localhost'
@@ -72,7 +72,7 @@ class Config:
         MAVEN_BINARY = 'mvn'
 
     MVN_REPOSITORY_ID = 'central'
-    MVN_REPOSITORY_URL = 'http://yourhost:8081/artifactory/libs-release-local'
+    MVN_REPOSITORY_URL = os.getenv('MVN_REPOSITORY_URL','http://yourhost:8081/artifactory/libs-release-local')
 
 
 conf = Config()

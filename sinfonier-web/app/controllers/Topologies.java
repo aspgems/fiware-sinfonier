@@ -1,25 +1,26 @@
 package controllers;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import org.bson.types.ObjectId;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import exceptions.SinfonierError;
 import exceptions.SinfonierException;
-import models.module.Module;
 import models.responses.Codes;
-import models.storm.ParamsValidator;
-import models.topology.Topology;
-import models.topology.TopologiesContainer;
-import models.topology.deserializers.TopologyDeserializer;
 import models.storm.Client;
-import org.bson.types.ObjectId;
+import models.storm.ParamsValidator;
+import models.topology.TopologiesContainer;
+import models.topology.Topology;
+import models.topology.deserializers.TopologyDeserializer;
 import play.Logger;
 import play.data.validation.Required;
-import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Catch;
@@ -236,4 +237,24 @@ public class Topologies extends WebSecurityController {
     Object[] args = e.getArgs();
     render("errors/error.html", error, args);
   }
+  
+  public static void export(@Required String id) throws SinfonierException {
+	    checkAuthenticity();
+	    Topology topology = Topology.findById(id);
+
+	    if (topology == null) {
+	      Logger.error("We can\'t find the topology with id: " + id);
+	      notFound();
+	      renderJSON(Codes.CODE_404.toGSON());
+	    } else {
+	    	Codes c200 = Codes.CODE_200;
+	    	JsonObject data = new JsonObject();
+	    	JsonElement jelement = new JsonParser().parse(topology.export());
+	        JsonObject  jobject = jelement.getAsJsonObject();
+	        data.add("topology", jobject);
+	        c200.setData(data);
+	        renderJSON(jobject);
+	    }
+	  }
+
 }
