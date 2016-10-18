@@ -7,17 +7,22 @@ import org.bson.types.ObjectId;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import exceptions.SinfonierError;
 import exceptions.SinfonierException;
+import models.module.Module;
+import models.module.ModuleVersion;
+import models.module.Version;
 import models.responses.Codes;
 import models.storm.Client;
 import models.storm.ParamsValidator;
 import models.topology.TopologiesContainer;
 import models.topology.Topology;
+import models.topology.TopologyModule;
 import models.topology.deserializers.TopologyDeserializer;
 import play.Logger;
 import play.data.validation.Required;
@@ -34,13 +39,16 @@ public class Topologies extends WebSecurityController {
 
   private static Client client = Client.getInstance();
 
-  @Before(unless = {"index", "topology", "search", "log"})
+  @Before(unless = {"index", "topology", "search", "log", "export", "importTopology","doImport"})
   static void hasWritePermission() throws SinfonierException {
     String id = request.params.get("id");
     if (id != null) {
       Topology topology = Topology.findById(id);
       if (topology == null || !topology.hasWritePermission(getCurrentUser()))
+      {
+      	Logger.error("No write permissions: "+request.url);
         forbidden();
+      }
     } else if (!request.actionMethod.equals("save")) {
       forbidden();
     }
@@ -257,4 +265,51 @@ public class Topologies extends WebSecurityController {
 	    }
 	  }
 
+	public static void importTopology() throws SinfonierException {
+		
+		render();
+	}
+
+  public static void doImport() throws SinfonierException {
+    try {
+      GsonBuilder gsonBuilder = new GsonBuilder();
+      gsonBuilder.registerTypeAdapter(Topology.class, new TopologyDeserializer());
+      Gson gson = gsonBuilder.create();
+      String body = request.params.get("body");
+      ParamsValidator validator = ParamsValidator.getInstance();
+      Topology topology = gson.fromJson(body, Topology.class);
+      topology.setAuthorId(getCurrentUser().getId());
+      Topology old = Topology.findByName(topology.getName());
+      if (old != null) {
+      	throw new SinfonierException(SinfonierError.TOPOLOGY_DUPLICATE);
+      }
+      JsonElement root = new JsonParser().parse(body);
+      JsonObject jTopology = root.getAsJsonObject().get("topology").getAsJsonObject();
+      JsonArray jModules = jTopology.getAsJsonObject().get("config").getAsJsonObject().get("modules").getAsJsonArray();
+      for (JsonElement jTopologyModule: jModules)
+      {
+      	TopologyModule.checkTopologyModule(jTopologyModule.getAsJsonObject());
+      }
+      
+      if (validator.validate(topology.getConfig())) {
+        String topologyId = topology.save();
+        renderJSON(new Gson().toJson(Topology.findById(topologyId)));
+      } else {
+        Codes c400 = Codes.CODE_400;
+        c400.setMessageData(Messages.get("validation.topology.params"));
+        response.status = c400.getCode();
+        renderJSON(c400.toGSON());
+      }
+    } catch (SinfonierException se) {
+        Codes c400 = Codes.CODE_400;
+        c400.setMessageData(se.getMessage());
+        response.status = c400.getCode();
+        renderJSON(c400.toGSON());
+    }
+  }
+
+
+	
 }
+
+

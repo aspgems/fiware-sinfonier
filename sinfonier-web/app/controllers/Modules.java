@@ -382,7 +382,6 @@ public class Modules extends WebSecurityController {
             if (res.get("code") != null && res.get("code").getAsInt() == 200) {
               // Recheck module version
               moduleVersion.recheck();
-              module.save();
               SinfonierMailer.reviewModule(module, moduleVersion);
             } else {
               log = Messages.get("Modules.recheck.error");

@@ -2,6 +2,8 @@ package models.responses;
 
 import com.google.gson.JsonObject;
 
+import play.i18n.Messages;
+
 public enum Codes {
   CODE_200("OK", 200),
   CODE_400("NOOK", 400),
@@ -38,6 +40,11 @@ public enum Codes {
     this.data = data;
   }
 
+  public void setMessageData(String message) {
+  	JsonObject data = new JsonObject();
+    data.addProperty("message", message);
+    this.data = data;
+  }
   public JsonObject toGSON() {
     JsonObject object = new JsonObject();
 

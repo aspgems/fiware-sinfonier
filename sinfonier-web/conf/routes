@@ -37,6 +37,7 @@ GET /topologies/{<-?[0-9]+>page}                                Topologies.index
 GET /topologies/search/?                                        Topologies.search(page:'1')
 GET /topologies/search/0                                        Topologies.search(page:'1')
 GET /topologies/search/{<-?[0-9]+>page}                         Topologies.search
+GET /topologies/import											Topologies.importTopology
 POST /topology/save                                             Topologies.save
 POST /topologies/{id}/save                                      Topologies.save
 POST /topology/{id}/remove                                      Topologies.remove
@@ -47,6 +48,7 @@ POST /topology/{id}/privatize                                   Topologies.priva
 POST /topology/{id}/publish                                     Topologies.publish
 POST /topology/{id}/export                                      Topologies.export
 GET /topologies/{name}                                          Topologies.topology
+POST /topologies/import                                         Topologies.doImport
 
 # Diagnostig
 GET /diagnosis                                                  Diagnosis.index
