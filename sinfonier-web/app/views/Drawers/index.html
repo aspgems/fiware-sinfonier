@@ -204,6 +204,17 @@
       var layout = YAHOO.widget.Layout.getLayoutById("editorContainer");
       layout.resize();
     });
+    
+    #{if models.SinfonierConstants.Drawer.IS_ACTIVE_EXTRA_PARAMS}
+      setTimeout(function () {
+        $(".yui-layout-doc").on("change", "textarea[name='extraConfiguration']", function(event) {
+          if ($(this).val()) {
+            parseExtraConfig(this);
+            revalidateRelatedFields();
+          }
+        });
+      }, 1000);
+    #{/if}
   });
   $("#changeToen,#changeToes").each(function(){
     $(this).submit(function(event) {
@@ -229,4 +240,5 @@
 
     #{script 'vendor/webhookit/editor/adapter.js'/}
     #{script 'vendor/webhookit/editor/topology_editor.js'/}
+    #{script 'drawer.js'/}
 #{/set}
