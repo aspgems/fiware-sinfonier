@@ -18,6 +18,7 @@ GET /modules/loadPredefined                                     Modules.loadPred
 GET /modules/{name}/versions/{versionCode}/edit                 Modules.edit
 GET /modules/{name}/versions/{versionCode}                      Modules.module
 GET /modules/{name}                                             Modules.module
+POST /modules/check                                             Modules.check
 POST /modules/save                                              Modules.save
 POST /modules/vote                                              Modules.vote
 POST /modules/{id}/versions/{versionCode}/remove                Modules.remove
@@ -49,6 +50,7 @@ POST /topology/{id}/publish                                     Topologies.publi
 POST /topology/{id}/export                                      Topologies.export
 GET /topologies/{name}                                          Topologies.topology
 POST /topologies/import                                         Topologies.doImport
+
 
 # Diagnostig
 GET /diagnosis                                                  Diagnosis.index

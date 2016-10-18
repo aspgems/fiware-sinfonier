@@ -33,12 +33,31 @@ function ImportTopology(e) {
 		  });
   }
   
+  this.checkModules = function() {
+    if (topology) {
+      $("#topology-div-error").empty();
+      topology.config.modules.forEach(function(module){
+        $.ajax("/modules/check", {
+          data : JSON.stringify({module:module}),
+            contentType : 'application/json',
+            type : 'POST'
+          }).done(function(data){
+            //nothing to do
+          }).fail(function(jqXHR){
+            $("#topology-div-error").removeClass('hide');
+            $("#topology-div-error").fadeIn();
+            $("#topology-div-error").append("<p>" +module.name+": "+jqXHR.responseJSON.data.message+"</p>")
+          });
+      });
+    }
+  }
   this.process = function (e) {
     try {
       topology = JSON.parse(e.target.result);
 
       that.prepareForm(topology);
       that.drawTopology(topology);
+      that.checkModules(topology);
       
     } catch (err) {
       console.error(err);
@@ -61,6 +80,10 @@ function prepareTopology(file) {
 	  fReader.readAsText(file);
 	}
 
+
+
+
+
 $(function(){
 	$("button#topology-do-import").click(function(){
 		if (topology)	{
@@ -81,4 +104,4 @@ $(function(){
 			});
 		}
 	})
-})
+});

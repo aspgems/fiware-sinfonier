@@ -1,8 +1,11 @@
 package controllers;
 
 import com.google.gson.Gson;
-
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import exceptions.SinfonierError;
 import exceptions.SinfonierException;
 import models.module.Container;
@@ -12,7 +15,11 @@ import models.module.ModuleSearch;
 import models.module.ModuleVersion;
 import models.module.Version;
 import models.module.Versions;
+import models.responses.Codes;
 import models.storm.Client;
+import models.topology.Topology;
+import models.topology.TopologyModule;
+import models.topology.deserializers.TopologyDeserializer;
 import models.user.Inappropriate;
 import models.user.MyTool;
 import models.user.Rating;
@@ -513,4 +520,23 @@ public class Modules extends WebSecurityController {
     Object[] args = e.getArgs();
     render("errors/error.html", error, args);
   }
+  
+  public static void check() throws SinfonierException {
+    try {
+      GsonBuilder gsonBuilder = new GsonBuilder();
+      gsonBuilder.registerTypeAdapter(Topology.class, new TopologyDeserializer());
+      Gson gson = gsonBuilder.create();
+      String body = request.params.get("body");
+      JsonElement root = new JsonParser().parse(body);
+      JsonObject jTopologyModule = root.getAsJsonObject().get("module").getAsJsonObject();
+      TopologyModule.checkTopologyModule(jTopologyModule.getAsJsonObject());
+      
+    } catch (SinfonierException se) {
+        Codes c400 = Codes.CODE_400;
+        c400.setMessageData(se.getMessage());
+        response.status = c400.getCode();
+        renderJSON(c400.toGSON());
+    }
+  }
+
 }
